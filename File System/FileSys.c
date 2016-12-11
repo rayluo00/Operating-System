@@ -1,8 +1,8 @@
 /* FileSys.c
  *
- * Weiming Raymond Luo
+ * Raymond Weiming Luo
  * CSCI 460 - Operating Systems
- * Assignment 4 : File System
+ * Assignment 4: File System
  *
  * This program is a file system implmentation that stores the input Data
  * into the respective inode block. A list of free blocks is implemented
@@ -71,8 +71,9 @@ int FindFreeBlock (int size) {
   int blockIndex = -1;
   struct freeblock* currentBlock = FreeBlocks;
   
-  if (currentBlock == NULL)
+  if (currentBlock == NULL) {
     return 0;
+  }
 
   size = (size+BYTES_PER_SECTOR-1)/BYTES_PER_SECTOR;
   
@@ -80,8 +81,7 @@ int FindFreeBlock (int size) {
     if (currentBlock->size >= size) {
       blockIndex = currentBlock->index;
       currentBlock->size -= size;
-      currentBlock->index += size;
-      
+      currentBlock->index += size;   
       return blockIndex;
     }
     currentBlock = currentBlock->next;
@@ -99,8 +99,9 @@ int FindFreeInode (int Size, int *freeBlock) {
   
   Size = (Size+BYTES_PER_SECTOR-1)/BYTES_PER_SECTOR;
 
-  if (Size > 4109)
+  if (Size > 4109) {
     return -1;
+  }
 
   if (Size > 13) {
     inodeSize = sizeof(single_inode);
@@ -119,7 +120,6 @@ int FindFreeInode (int Size, int *freeBlock) {
     *freeBlock = FindFreeBlock(inodeSize);
     return 3;
   }
-
   return 0;
 }
 
@@ -129,15 +129,18 @@ int FindFreeInode (int Size, int *freeBlock) {
  * created.
  */
 int CSCI460_Format(){
-  if (!DevFormat())
+  if (!DevFormat()) {
     return 0;
+  }
 
   if (FS_STATUS) {
-    if (FileSystem != NULL)
+    if (FileSystem != NULL) {
       free(FileSystem);
+    }
   
-    if (FreeBlocks != NULL)
+    if (FreeBlocks != NULL) {
       free(FreeBlocks);
+    }
   } else {
     FreeBlocks = (struct freeblock *) malloc(sizeof(struct freeblock));
 
@@ -147,7 +150,6 @@ int CSCI460_Format(){
 
     FS_STATUS = 1;
   }
-
   return 1;
 }
 
@@ -175,14 +177,16 @@ int CSCI460_Write (char *FileName, int Size, char *Data) {
   struct double_inode *doubleInode;
   struct triple_inode *tripleInode;
 
-  if (!FS_STATUS)
+  if (!FS_STATUS) {
     return writeStatus;
+  }
 
   adjustedSize = (Size+BYTES_PER_SECTOR-1)/BYTES_PER_SECTOR;
   freeIndex = FindFreeBlock(Size);
   
-  if (freeIndex == -1)
+  if (freeIndex == -1) {
     return writeStatus;
+  }
   
   newFile = (struct file *) malloc(sizeof(struct file));
   currentInode = (struct inode *) malloc(sizeof(struct inode));
@@ -193,10 +197,10 @@ int CSCI460_Write (char *FileName, int Size, char *Data) {
   newFile->next = NULL;
   newInode = newFile->inode;
 
-  if (FileSystem == NULL){
+  if (FileSystem == NULL) {
     FileSystem = newFile;
   } else{
-    while (currentFile->next != NULL){
+    while (currentFile->next != NULL) {
       currentFile = currentFile->next;
     }
     currentFile->next = newFile;
@@ -261,21 +265,22 @@ int CSCI460_Write (char *FileName, int Size, char *Data) {
           return 0;
         }
 
-        if (inodeStatus == 2)
+        if (inodeStatus == 2) {
           doubleInode->blocks[inodeSector]->blocks[i-29] = freeIndex+i;
-        else
+	} else {
           tripleInode->blocks[inodeSector]->blocks[j-269]->blocks[i-29] = freeIndex+i;
+	}
       }
     }
 
     if (inodeStatus == 2) {
-      if (!DevWrite(freeBlock, (char *) doubleInode)){
+      if (!DevWrite(freeBlock, (char *) doubleInode)) {
         fprintf(stderr, "error : CSCI460_Write() failed when writing to file using driver\n");
         return 0;
       }
       newInode->doubleInode = freeBlock;
     } else {
-      if (!DevWrite(freeBlock, (char *) tripleInode)){
+      if (!DevWrite(freeBlock, (char *) tripleInode)) {
         fprintf(stderr, "error : CSCI460_Write() failed when writing to file using driver\n");
         return 0;
       }
@@ -297,17 +302,18 @@ int CSCI460_Read (char *FileName, int MaxSize, char *Data) {
   struct file *currentFile = FileSystem;
   struct inode *currentInode;
 
-  if (!FS_STATUS)
+  if (!FS_STATUS) {
     return 0;
+  }
   
-  while(currentFile != NULL){
-    if (!(strcmp(currentFile->name, FileName))){
+  while(currentFile != NULL) {
+    if (!(strcmp(currentFile->name, FileName))) {
       currentInode = currentFile->inode;
       fileSize = ((currentFile->size)+BYTES_PER_SECTOR-1)/BYTES_PER_SECTOR;
 
-      while (inodeIndex < fileSize){
+      while (inodeIndex < fileSize) {
         readStatus = DevRead(currentInode->blocks[inodeIndex], fileData);
-        if(!readStatus){
+        if(!readStatus) {
           fprintf(stderr, "error : CSCI460_READ() reading from DevRead() failed\n");
           return readStatus;
         }
@@ -334,13 +340,15 @@ int CSCI460_Delete (char *Filename) {
   struct file *nextFile;
   struct freeblock *cleanBlock;
 
-  if (!FS_STATUS)
+  if (!FS_STATUS) {
     return deleteStatus;
+  }
   
   currentFile = FileSystem;
 
-  if (currentFile == NULL)
+  if (currentFile == NULL) {
     return deleteStatus;
+  }
   
   if (!(strcmp(currentFile->name, Filename))){
     FileSystem = FileSystem->next;
@@ -359,11 +367,9 @@ int CSCI460_Delete (char *Filename) {
       FreeBlocks = cleanBlock;
       deleteStatus = 1;
       free(nextFile);
-
       return deleteStatus;
     }
     currentFile = currentFile->next;
   }
-  
   return deleteStatus;
 }
