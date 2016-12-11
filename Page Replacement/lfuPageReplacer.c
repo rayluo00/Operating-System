@@ -1,10 +1,9 @@
 /*
  * lfuPageReplacer.c
  *
- * Weiming Raymond Luo
+ * Raymond Weiming Luo
  * CSCI 460 - Operating Systems	
- * Assignment 3 - Page Replacement Algorithm
- * Last modified : November 21, 2016
+ * Assignment 3: Page Replacement Algorithm
  *
  * Implmentation of the Least Frequently Used page replacement algorithm.
  * Every time a page is referenced, the counter is incremented and the  
@@ -16,7 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "MemSim.h"
-//#include "Dispatcher.h"
 #include "Assg3.h"
 
 #define MAXPROC	64
@@ -45,8 +43,9 @@ proc* table[TABLESIZE];
  */
 int FindPid (int pid) {
   for (int i = 0; i < MAXPROC; i++) {
-    if (pidTable[i] == pid)
+    if (pidTable[i] == pid) {
       return i;
+    }
   }
 
   return -1;
@@ -62,13 +61,12 @@ int FindPage (int pid, int page, int write) {
     if (table[i]->pid == pid && table[i]->page == page && table[i]->valid == 1) {
       table[i]->reference++;
 
-      if (table[i]->modify == 0)
+      if (table[i]->modify == 0) {
         table[i]->modify = write;
-      
+      }   
       return i;
     }
   }
-
   return -1;
 }
 
@@ -126,12 +124,10 @@ int AddPage (int pid, int page, int write) {
       table[0]->page = page;
       table[0]->valid = 1;
       table[0]->modify = write;
-      table[0]->reference = 0;
-      
+      table[0]->reference = 0;   
       return i;
     }
   }
-
   return -1;
 }
 
@@ -151,10 +147,11 @@ int ReplacePage (int pid, int page, int write) {
   }
 
   if (lowRefIndex != -1) {
-    if (table[lowRefIndex]->modify)
+    if (table[lowRefIndex]->modify) {
       writePageCount++;
-    else
+    } else {
       readPageCount++;
+    }
 
     InvertTable(lowRefIndex);
 
@@ -163,10 +160,8 @@ int ReplacePage (int pid, int page, int write) {
     table[0]->valid = 1;
     table[0]->modify = write;
     table[0]->reference = 0;
-
     return lowRefIndex;
   }
-
   return -1;
 }
 
@@ -176,8 +171,9 @@ int ReplacePage (int pid, int page, int write) {
  */
 void Remove (int pid) {
   for (int i = 0; i < TABLESIZE; i++) {
-    if (table[i]->pid == pid)
+    if (table[i]->pid == pid) {
       table[i]->valid = 0;
+    }
 
     if (i < MAXPROC && pidTable[i] == pid) {
       pidTable[i] = -1;
@@ -204,8 +200,9 @@ int Access (int pid, int address, int write) {
 
   if (pageReferenceCount == 999) {
     for (i = 0; i < TABLESIZE; i++) {
-      if (table[i]->valid == 1)
+      if (table[i]->valid == 1) {
         table[i]->reference = table[i]->reference/2;
+      }
     }
     
     pageReferenceCount = 0;
@@ -213,12 +210,13 @@ int Access (int pid, int address, int write) {
   
   if (FindPid(pid) != -1) {
     for (i = 0; i < 3; i++) {
-      if (i == 0)
+      if (i == 0) {
         tableIndex = FindPage(pid, page, write);
-      else if (i == 1)
+      } else if (i == 1) {
         tableIndex = AddPage(pid, page, write);
-      else if (i == 2)
+      } else if (i == 2) {
         tableIndex = ReplacePage(pid, page, write);
+      }
       
       if (tableIndex > -1) {
         newAddr = ((tableIndex << 12) | offset);
@@ -235,24 +233,24 @@ int Access (int pid, int address, int write) {
 
     if (AddPid(pid) != -1) {
       for (i = 0; i < 2; i++) {
-        if (i == 0)
+        if (i == 0) {
           tableIndex = AddPage(pid, page, write);
-        else if (i == 1)
+	} else if (i == 1) {
           tableIndex = ReplacePage(pid, page, write);
+	}
 
         if (tableIndex > -1) {
           return ((tableIndex << 12) | offset);
         }
       }
     }
-
     return 0;
   }
 }
 
 /********************************************************************************
- * Terminate the pid and remove it from the PID table and 
- * corresponding page table.
+ * Terminate the pid and remove it from the PID table and corresponding
+ * page table.
  */
 void Terminate (int pid) {
   printf("pid %d terminated\n", pid);

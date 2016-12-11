@@ -1,10 +1,9 @@
 /*
  * lruPageReplacer.c
  *
- * Weiming Raymond Luo	
+ * Raymond Weiming Luo	
  * CSCI 460 - Operating Systems
- * Assignment 3 - Page Replacement Algorithm
- * Last modified : November 21, 2016
+ * Assignment 3: Page Replacement Algorithm
  *
  * Implementation of the Least Recently Used, Enhanced Second Chance 
  * algorithm. THe page being replaced follows the critera based on the
@@ -15,7 +14,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "MemSim.h"
-//#include "Dispatcher.h"
 #include "Assg3.h"
 
 #define MAXPROC	64
@@ -42,10 +40,10 @@ proc* table[TABLESIZE];
  */
 int FindPid (int pid) {
   for (int i = 0; i < MAXPROC; i++) {
-    if (pidTable[i] == pid)
+    if (pidTable[i] == pid) {
       return i;
+    }
   }
-
   return -1;
 }
 
@@ -59,13 +57,12 @@ int FindPage (int pid, int page, int write) {
     if (table[i]->pid == pid && table[i]->page == page && table[i]->valid == 1) {
       table[i]->reference = 1;
 
-      if (table[i]->modify == 0)
+      if (table[i]->modify == 0) {
         table[i]->modify = write;
-      
+      }
       return i;
     }
   }
-
   return -1;
 }
 
@@ -123,12 +120,10 @@ int AddPage (int pid, int page, int write) {
       table[0]->page = page;
       table[0]->valid = 1;
       table[0]->modify = write;
-      table[0]->reference = 1;
-     
+      table[0]->reference = 1;  
       return i;
     }
   }
-
   return -1;
 }
 
@@ -149,10 +144,11 @@ int ReplacePage (int pid, int page, int write) {
   while (refBit < 2 && modBit < 2) {
     for (i = 0; i < TABLESIZE; i++) {
       if (table[i]->valid == 1 && table[i]->reference == refBit && table[i]->modify == modBit) {
-        if (table[i]->modify)
+        if (table[i]->modify) {
           writePageCount++;
-        else
+	} else {
           readPageCount++;
+	}
 
         InvertTable(i);
 
@@ -165,17 +161,16 @@ int ReplacePage (int pid, int page, int write) {
         for (k = 1; k < i; k++) {
           table[k]->reference = 0;
         }
-        
         return i;
       }
     }
 
-    if (refBit == modBit)
+    if (refBit == modBit) {
       modBit++;
-    else
+    } else {
       refBit++;
+    }
   }
-
   return -1;
 }
 
@@ -185,8 +180,9 @@ int ReplacePage (int pid, int page, int write) {
  */
 void Remove (int pid) {
   for (int i = 0; i < TABLESIZE; i++) {
-    if (table[i]->pid == pid)
+    if (table[i]->pid == pid) {
       table[i]->valid = 0;
+    }
 
     if (i < MAXPROC && pidTable[i] == pid) {
       pidTable[i] = -1;
@@ -210,12 +206,13 @@ int Access (int pid, int address, int write) {
 
   if (FindPid(pid) != -1) {
     for (int i = 0; i < 3; i++) {
-      if (i == 0)
+      if (i == 0) {
         tableIndex = FindPage(pid, page, write);
-      else if (i == 1)
+      } else if (i == 1) {
         tableIndex = AddPage(pid, page, write);
-      else if (i == 2)
+      } else if (i == 2) {
         tableIndex = ReplacePage(pid, page, write);
+      }
       
       if (tableIndex > -1) {
         newAddr = ((tableIndex << 12) | offset);
@@ -232,17 +229,17 @@ int Access (int pid, int address, int write) {
 
     if (AddPid(pid) != -1) {
       for (int i = 0; i < 2; i++) {
-        if (i == 0)
+        if (i == 0) {
           tableIndex = AddPage(pid, page, write);
-        else if (i == 1)
+	} else if (i == 1) {
           tableIndex = ReplacePage(pid, page, write);
+	}
 
         if (tableIndex > -1) {
           return ((tableIndex << 12) | offset);
         }
       }
     }
-
     return 0;
   }
 }
