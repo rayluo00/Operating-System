@@ -1,9 +1,12 @@
-/*
- * Weiming Raymond Luo
- * CSCI 460 : Assignment 1 - Process1
+/* Process1.c
+ *
+ * Author: Raymond Weiming Luo
+ * CSCI 460 - Operating Systems
+ * Assignment 1: Shared Memory
  *
  * Process1 will create a shared memory and store the data of the user input for Process2
  * to access and used later.
+ *
  */
 
 #include <stdio.h>
@@ -18,11 +21,12 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-/*
+/*****************************************************************************************
  * Process1 will fork a child process to get a number from the user in stdin. The child
  * will then create a shared memory to store the input that Process2 can later access.
  * Child process will sleep to wait until Process2 finishes using the shared memory before
  * closing.
+ *
  */
 void main () {
   int childPid;
@@ -31,7 +35,8 @@ void main () {
   int *memory;
   int shareMemId;
   key_t key;
-  
+
+  // Key to access shared memory.
   key = 8888;
   
   printf("%s", "Input a number : ");
@@ -61,6 +66,7 @@ void main () {
     *shareMem = inputNum;
     *memory = inputNum;
 
+    // Sleep until the data in the shared memory has been updated.
     while (*shareMem != (inputNum%26)) {
       printf("%s | %d\n", "Child 1 sleeping...", *shareMem);
       sleep(3);

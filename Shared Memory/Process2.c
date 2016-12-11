@@ -1,9 +1,12 @@
-/*
- * Weiming Raymond Luo
- * CSCI 460 : Assignment 1 - Process2
+/* Process2.c
+ *
+ * Raymond Weiming Luo
+ * CSCI 460 : Operating Systems
+ * Assignment 1: Shared Memory
  *
  * Process2 retrieve data from shared memory that was placed from Process1 to perform
  * a simple math computation.
+ *
  */
 
 #include <stdio.h>
@@ -18,10 +21,11 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-/*
+/*****************************************************************************************
  * Process2 will fork a child process to retrieve the input number from the child process 
  * in Process1 via shared memory. Then perform [Input Number] % 26, to pipe the result to
  * the parent process. The parent process will then print the result. 
+ *
  */
 
 void main () {
@@ -33,6 +37,7 @@ void main () {
   int *mem;
   int fd[2];
 
+  // Key to access shared memory
   key = 8888;
 
   if (pipe(fd)) {
@@ -55,6 +60,7 @@ void main () {
       exit (EXIT_FAILURE);
     }
 
+    // Recieve the shared memory created in Process1.c
     if ((shareMem = shmat (shareMemId, NULL, 0)) == (int *) -1) {
       perror ("shmat");
       exit (EXIT_FAILURE);
