@@ -1,7 +1,8 @@
-/*
- * Weiming Raymond Luo
- * CSCI 460 : Operating Systems
- * Last modified : November 8, 2016
+/* 4bsd_scheduler.c
+ *
+ * Raymond Weiming Luo
+ * CSCI 460 - Operating Systems
+ * Assignment 2: CPU Scheduler
  *
  * Basic implementation of the ULE scheduling algorithm which will
  * run a simulation of multiple processes running with a max excution
@@ -80,21 +81,24 @@ struct ProcessNode* getWaitProcess (struct ProcessNode *front, int currPid) {
     exit(EXIT_FAILURE);
   }
   
-  if (front == NULL)
+  if (front == NULL) {
     return NULL;
+  }
   
   if (front->pid == currPid) {
     tempProcess = front;
     front = tempProcess->nextProcess;
 
-    if (waitHead == NULL)
+    if (waitHead == NULL) {
       waitTail = NULL;
+    }
 
     return tempProcess;
   }
 
-  if (front->nextProcess == NULL)
+  if (front->nextProcess == NULL) {
     return NULL;
+  }
 
   tempProcess = front->nextProcess;
 
@@ -102,8 +106,9 @@ struct ProcessNode* getWaitProcess (struct ProcessNode *front, int currPid) {
     if (tempProcess->pid == currPid) {
       front->nextProcess = tempProcess->nextProcess;
       
-      if (front->nextProcess == NULL)
+      if (front->nextProcess == NULL) {
         waitTail = front;
+      }
       
       return tempProcess;
     }
@@ -112,11 +117,10 @@ struct ProcessNode* getWaitProcess (struct ProcessNode *front, int currPid) {
       front->nextProcess = NULL;
       return NULL;
     }
-
+    
     front = tempProcess;
     tempProcess = tempProcess->nextProcess;
   }
-
   return NULL;
 }
 
@@ -162,10 +166,11 @@ void Dispatch (int *pid) {
   
   printf("Process %d dispatched\n", *pid);
   
-  if (currentHead == currentTail)
+  if (currentHead == currentTail) {
     currentHead = currentTail = NULL;
-  else
+  } else {
     currentHead = currentHead->nextProcess;
+  }
 
   waitNode = getWaitProcess(waitHead, *pid);
 

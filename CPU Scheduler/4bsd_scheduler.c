@@ -1,7 +1,8 @@
-/*
- * Weiming Raymond Luo
- * CSCI 460 : Operating Systems
- * Last modified : November 6, 2016
+/* 4bsd_scheduler.c
+ *
+ * Raymond Weiming Luo
+ * CSCI 460 - Operating Systems
+ * Assignment 2: CPU Scheduler
  *
  * This is a basic implementation on the 4BSD scheduler algorithm using
  * a heap to store the process data and a priority queue implementation.
@@ -123,8 +124,7 @@ int checkQueuePosition (PriorityQueue *queue, int *targetPid) {
       pos = x;
       return pos;
     }
-  }
-  
+  }  
   return pos;
 }
 
@@ -164,8 +164,9 @@ int pop (PriorityQueue *queue, int pid) {
   double currTimeInQueue;
   enum Status currStatus;
   
-  if (!queue->size)
+  if (!queue->size) {
     return -1;
+  }
 
   currPid = queue->process[1].pid;
   currStatus = queue->process[1].status;
@@ -179,17 +180,22 @@ int pop (PriorityQueue *queue, int pid) {
   while (1) {
     k = i;
     j = 2 * i;
-    if (j <= queue->size && queue->process[j].priority < queue->process[k].priority)
+    
+    if (j <= queue->size && queue->process[j].priority < queue->process[k].priority) {
       k = j;
+    }
     
-    if (j + 1 <= queue->size && queue->process[j + 1].priority < queue->process[k].priority)
+    if (j + 1 <= queue->size && queue->process[j + 1].priority < queue->process[k].priority) {
       k = j + 1;
+    }
     
-    if (queue->process[i].pid == pid) 
+    if (queue->process[i].pid == pid) {
       break;
+    }
     
-    if (k == i) 
+    if (k == i) {
       break;
+    }
     
     queue->process[i] = queue->process[k];
     i = k;
@@ -225,8 +231,9 @@ void Dispatch(int *pid) {
     wCurrPid = pop(wQueue, *pid);
   }
 
-  if (pQueuePos != -1)
+  if (pQueuePos != -1) {
     configRuntime(readyRuntime, pQueue->process[pQueuePos]);
+  }
   
   pCurrPid = pop(pQueue, *pid);
   
@@ -269,24 +276,28 @@ void Ready(int pid, int CPUtimeUsed) {
     push(pQueue, pid, 8, READY, pTime);
     pQueuePos = checkQueuePosition(pQueue, &pid);
 
-    if (pQueuePos != -1)
+    if (pQueuePos != -1) {
       pQueue->process[pQueuePos].timeInQueue = getCurrentTime();
+    }
   } else {
     currStatus = pQueue->process[pQueuePos].status;
     currPriority = pQueue->process[pQueuePos].priority;
     currPid = pop(pQueue, pid);
     
-    if (currPriority != 0 && CPUtimeUsed == 100)
+    if (currPriority != 0 && CPUtimeUsed == 100) {
       currPriority--;
-    if (currPriority != 14 && currStatus == WAIT)
+    }
+    if (currPriority != 14 && currStatus == WAIT) {
       currPriority++;
+    }
 
     push(pQueue, currPid, currPriority, READY, pTime);
   }
 
   pQueuePos = checkQueuePosition(pQueue, &pid);
-  if (pQueuePos != -1)
+  if (pQueuePos != -1) {
     configRuntime(readyRuntime, pQueue->process[pQueuePos]);
+  }
 
   printf("Process %d added to READY priority queue at %d msec\n", pid, CPUtimeUsed);
 }
@@ -300,9 +311,9 @@ void Waiting(int pid) {
 
   queuePos = checkQueuePosition(wQueue, &pid);
 
-  if (queuePos == -1)
+  if (queuePos == -1) {
     push(wQueue, pid, 8, WAIT, 0.00);
-  else {
+  } else {
     wQueue->process[queuePos].timeInQueue = getCurrentTime();
     wQueue->process[queuePos].priority--;
     wQueue->process[queuePos].status = WAIT;
@@ -315,7 +326,6 @@ void Waiting(int pid) {
  * Terminate the process.
  */
 void Terminate(int pid) {
-  //pop(pQueue, pid);
   printf("Process %d terminated\n", pid);
 }
 
